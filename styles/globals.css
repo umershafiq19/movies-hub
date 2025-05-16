@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: white;
+  color: black;
+  transition: all 0.3s ease;
+}
+
+.container.dark body {
+  background: #121212;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.layout {
+  display: flex;
+  padding: 1rem;
+}
+
+aside {
+  width: 25%;
+}
+
+main {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+
+
+/* After (correct) */
+body.dark {
+  background: #121212;
+  color: white;
+}
+

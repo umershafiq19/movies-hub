@@ -1,12 +1,13 @@
 import Link from 'next/link';
+import styles from './MovieCard.module.css';
 
 export default function MovieCard({ movie }) {
   return (
-    <div className="border p-4 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-2">{movie.title}</h2>
-      <p className="mb-2">Year: {movie.releaseYear}</p>
-      <p className="mb-2">Rating: {movie.rating}</p>
-      <Link href={`/movies/${movie.id}`} className="text-blue-600 hover:underline">
+    <div className={styles.card}>
+      <h2 className={styles.title}>{movie.title}</h2>
+      <p className={styles.text}>Year: {movie.releaseYear}</p>
+      <p className={styles.text}>Rating: {movie.rating}</p>
+      <Link href={`/movies/${movie._id}`} className={styles.button}>
         View Details
       </Link>
     </div>

@@ -1,0 +1,44 @@
+/* MovieCard.module.css */
+.card {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  transition: background 0.3s ease;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.text {
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.button {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: teal;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background-color: #006d6d;
+}
+
+/* Optional: handle dark mode */
+.dark .card {
+  background: #1a1a1a;
+  color: #eee;
+}
+
+.dark .button {
+  background-color: #00b3b3;
+}

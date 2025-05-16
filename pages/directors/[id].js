@@ -1,40 +1,36 @@
+import clientPromise from '@/lib/mongodb';
 import MovieCard from '@/components/MovieCard';
 
 export async function getStaticPaths() {
-  const res = await fetch('http://localhost:3000/api/directors');
-  const data = await res.json();
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
+  const directors = await db.collection('directors').find({}).toArray();
 
-  const paths = data.directors.map((director) => ({
+  const paths = directors.map((director) => ({
     params: { id: director.id },
   }));
 
-  return { paths, fallback: false };
+  return {
+    paths,
+    fallback: false,
+  };
 }
 
 export async function getStaticProps({ params }) {
-  const directorId = params.id;
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
 
-  const [directorsRes, moviesRes] = await Promise.all([
-    fetch('http://localhost:3000/api/directors'),
-    fetch('http://localhost:3000/api/movies'),
-  ]);
-
-  const directorsData = await directorsRes.json();
-  const moviesData = await moviesRes.json();
-
-  const director = directorsData.directors.find((d) => d.id === directorId);
-  const movies = moviesData.movies.filter((m) => m.directorId === directorId);
+  const director = await db.collection('directors').findOne({ id: params.id });
+  const movies = await db.collection('movies').find({ directorId: params.id }).toArray();
 
   if (!director) {
-    return {
-      notFound: true,
-    };
+    return { notFound: true };
   }
 
   return {
     props: {
-      director,
-      movies,
+      director: JSON.parse(JSON.stringify(director)),
+      movies: JSON.parse(JSON.stringify(movies)),
     },
     revalidate: 10,
   };

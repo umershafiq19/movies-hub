@@ -1,11 +1,13 @@
-import { useRouter } from 'next/router';
+import clientPromise from '@/lib/mongodb';
 import MovieCard from '@/components/MovieCard';
 
 export async function getStaticPaths() {
-  const res = await fetch('http://localhost:3000/api/genres');
-  const data = await res.json();
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
 
-  const paths = data.genres.map((genre) => ({
+  const genres = await db.collection('genres').find({}).toArray();
+
+  const paths = genres.map((genre) => ({
     params: { id: genre.id },
   }));
 
@@ -13,34 +15,23 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const genreId = params.id;
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
 
-  const [moviesRes, genresRes] = await Promise.all([
-    fetch('http://localhost:3000/api/movies'),
-    fetch('http://localhost:3000/api/genres'),
-  ]);
-
-  const moviesData = await moviesRes.json();
-  const genresData = await genresRes.json();
-
-  const genre = genresData.genres.find((g) => g.id === genreId);
-  const filteredMovies = moviesData.movies.filter((m) => m.genreId === genreId);
+  const genre = await db.collection('genres').findOne({ id: params.id });
+  const movies = await db.collection('movies').find({ genreId: params.id }).toArray();
 
   return {
     props: {
-      genre: genre || null,
-      movies: filteredMovies,
+      genre: genre ? JSON.parse(JSON.stringify(genre)) : null,
+      movies: JSON.parse(JSON.stringify(movies)),
     },
     revalidate: 10,
   };
 }
 
 export default function GenrePage({ genre, movies }) {
-  const router = useRouter();
-
-  if (!genre) {
-    return <p>Genre not found</p>;
-  }
+  if (!genre) return <p>Genre not found</p>;
 
   return (
     <div style={{ padding: '2rem' }}>

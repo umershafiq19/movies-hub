@@ -2,23 +2,23 @@ import { useContext, useEffect } from 'react';
 import Link from 'next/link';
 import MovieCard from '@/components/MovieCard';
 import { ThemeContext } from '@/contexts/ThemeContext';
+import clientPromise from '@/lib/mongodb';
 
 export async function getStaticProps() {
-  const [moviesRes, genresRes, directorsRes] = await Promise.all([
-    fetch('http://localhost:3000/api/movies'),
-    fetch('http://localhost:3000/api/genres'),
-    fetch('http://localhost:3000/api/directors'), // fetch directors here
-  ]);
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
 
-  const moviesData = await moviesRes.json();
-  const genresData = await genresRes.json();
-  const directorsData = await directorsRes.json();
+  const [movies, genres, directors] = await Promise.all([
+    db.collection('movies').find({}).toArray(),
+    db.collection('genres').find({}).toArray(),
+    db.collection('directors').find({}).toArray(),
+  ]);
 
   return {
     props: {
-      movies: moviesData.movies || [],
-      genres: genresData.genres || [],
-      directors: directorsData.directors || [],
+      movies: JSON.parse(JSON.stringify(movies)),
+      genres: JSON.parse(JSON.stringify(genres)),
+      directors: JSON.parse(JSON.stringify(directors)),
     },
     revalidate: 10,
   };

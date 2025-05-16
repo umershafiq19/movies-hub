@@ -1,14 +1,40 @@
+import clientPromise from '@/lib/mongodb';
 
-export async function getStaticProps({ params }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/directors/${params.id}`);
-  const data = await res.json();
+export async function getStaticPaths() {
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
+  const directors = await db.collection('directors').find({}).toArray();
 
-  if (!data || data.error) return { notFound: true };
+  const paths = directors.map((director) => ({
+    params: { id: director.id },
+  }));
 
   return {
-    props: { director: data },
-    revalidate: 10,
+    paths,
+    fallback: 'blocking',
   };
+}
+
+export async function getStaticProps({ params }) {
+  const client = await clientPromise;
+  const db = client.db('movies-hub');
+
+  const director = await db.collection('directors').findOne({ id: params.id });
+  if (!director) return { notFound: true };
+
+  const movies = await db.collection('movies').find({ directorId: params.id }).toArray();
+
+  return {
+  props: {
+    director: {
+      ...director,
+      _id: director._id.toString(), // ✅ Fix serialization issue
+      movies: JSON.parse(JSON.stringify(movies)), // already fine
+    },
+  },
+  revalidate: 10,
+};
+
 }
 
 export default function DirectorPage({ director }) {
